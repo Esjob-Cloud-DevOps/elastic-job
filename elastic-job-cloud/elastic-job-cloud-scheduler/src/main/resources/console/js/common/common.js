@@ -98,3 +98,15 @@ function authorityControl() {
         }
     });
 }
+
+function getMesosRole() {
+    $.ajax({
+        url: "/api/operate/mesosRole",
+        type: "GET",
+        success: function (data) {
+            if (null !== data) {
+                $("#mesos-role").text(data);
+            }
+        }
+    });
+}

@@ -107,4 +107,15 @@ public final class CloudOperationRestfulApi {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(appName), "Lack param 'appName'");
         return mesosStateService.sandbox(appName);
     }
+
+    /**
+     * 获取作业云Mesos角色信息.
+     *
+     * @return mesos role
+     */
+    @GET
+    @Path("/mesosRole")
+    public String getMesosRole() {
+        return BootstrapEnvironment.getInstance().getMesosRole().orNull();
+    }
 }
