@@ -31,11 +31,7 @@ import com.google.common.collect.Sets;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -258,6 +254,44 @@ public final class RunningService {
         return TASK_HOSTNAME_MAPPER.remove(taskId);
     }
     
+    /**
+     * 根据任务主键获取主机名称.
+     *
+     * @param taskId 任务主键
+     * @return hostName 主机名称
+     */
+    public String getHostNameByTaskId(final String taskId) {
+        return TASK_HOSTNAME_MAPPER.get(taskId);
+    }
+
+    /**
+     * 根据任务主键判断zk中是否存在running节点.
+     *
+     * @param taskId 任务主键
+     * @return running节点中是否存在
+     */
+    public boolean getRunningTaskInZookeeper(final String taskId) {
+        List<String> jobKeys = regCenter.getChildrenKeys(RunningNode.ROOT);
+        boolean taskExistFlag = false;
+        if (0 == jobKeys.size()) {
+            return false;
+        }
+        for (String each : jobKeys) {
+            if (taskId.split("@")[0].equals(each)) {
+                List<String> taskKeys = regCenter.getChildrenKeys(RunningNode.getRunningJobNodePath(each));
+                if (0 == taskKeys.size()) {
+                    return false;
+                }
+                for (String eachTask : taskKeys) {
+                    if (taskId.contains(eachTask)) {
+                        taskExistFlag = true;
+                    }
+                }
+            }
+        }
+        return taskExistFlag;
+    }
+
     /**
      * 清理所有运行时状态.
      */

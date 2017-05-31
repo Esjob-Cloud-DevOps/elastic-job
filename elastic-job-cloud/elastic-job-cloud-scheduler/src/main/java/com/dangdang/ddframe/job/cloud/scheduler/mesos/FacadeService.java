@@ -265,6 +265,16 @@ public final class FacadeService {
     }
     
     /**
+     * 获取待运行作业次数.
+     *
+     * @param jobName 作业名称
+     * @return 待运行作业次数
+     */
+    public Collection<Map<String, String>> getReadyJobTimes(final String jobName) {
+        return readyService.getReadyJobTimes(jobName);
+    }
+    
+    /**
      * 获取所有运行中的任务.
      *
      * @return 运行中任务集合
@@ -274,6 +284,16 @@ public final class FacadeService {
     }
     
     /**
+     * 获取作业所有运行中的任务.
+     *
+     * @param jobName 作业名称
+     * @return 运行中任务集合
+     */
+    public Collection<TaskContext> getJobRunningTasks(final String jobName) {
+        return runningService.getRunningTasks(jobName);
+    }
+
+    /**
      * 获取待失效转移的全部任务.
      *
      * @return 待失效转移的全部任务
@@ -282,6 +302,16 @@ public final class FacadeService {
         return failoverService.getAllFailoverTasks();
     }
     
+    /**
+     * 获取作业待失效转移的任务.
+     *
+     * @param jobName 作业名称
+     * @return 待失效转移任务集合
+     */
+    public Collection<FailoverTaskInfo> getJobFailoverTasks(final String jobName) {
+        return failoverService.getFailoverTasks(jobName);
+    }
+
     /**
      * 判断作业是否被禁用.
      * 
@@ -311,6 +341,26 @@ public final class FacadeService {
         disableJobService.add(jobName);
     }
     
+    /**
+     * 根据任务主键获取主机名称.
+     *
+     * @param taskId 任务主键
+     * @return hostName 主机名称
+     */
+    public String getHostNameByTaskId(final String taskId) {
+        return runningService.getHostNameByTaskId(taskId);
+    }
+
+    /**
+     * 根据任务主键判断zk中是否存在running节点.
+     *
+     * @param taskId 任务主键
+     * @return running节点中是否存在
+     */
+    public boolean getRunningTaskInZookeeper(final String taskId) {
+        return runningService.getRunningTaskInZookeeper(taskId);
+    }
+
     /**
      * 停止门面服务.
      */

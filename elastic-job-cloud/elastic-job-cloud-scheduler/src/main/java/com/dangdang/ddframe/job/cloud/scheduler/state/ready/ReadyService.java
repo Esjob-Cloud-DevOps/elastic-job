@@ -31,12 +31,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Collections2;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 待运行作业队列服务.
@@ -182,6 +177,24 @@ public final class ReadyService {
             if (!Strings.isNullOrEmpty(times)) {
                 result.put(each, Integer.parseInt(times));
             }
+        }
+        return result;
+    }
+
+    /**
+     * 获取待运行作业次数.
+     *
+     * @param jobName 作业名
+     * @return 待运行作业次数
+     */
+    public Collection<Map<String, String>> getReadyJobTimes(final String jobName) {
+        String times = regCenter.get(ReadyNode.getReadyJobNodePath(jobName));
+        Collection<Map<String, String>> result = new LinkedList<>();
+        Map<String, String> readyMap = new HashMap<>();
+        if (!Strings.isNullOrEmpty(times)) {
+            readyMap.put("jobName", jobName);
+            readyMap.put("times", times);
+            result.add(readyMap);
         }
         return result;
     }

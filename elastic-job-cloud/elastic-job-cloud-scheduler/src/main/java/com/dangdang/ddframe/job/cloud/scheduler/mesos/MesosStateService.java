@@ -105,6 +105,63 @@ public class MesosStateService {
     }
     
     /**
+     * 获取任务沙箱信息.
+     *
+     * @param appName,executorId 作业云配置App名称，执行器主键
+     * @return 沙箱信息
+     * @throws JSONException 解析JSON格式异常
+     */
+    public String getTaskSandbox(final String appName, final String executorId) throws JSONException {
+        JSONObject state = fetch(stateUrl);
+        StringBuilder taskSandbox = new StringBuilder();
+        taskSandbox.append(state.getString("pid").split("@")[1]).append("/#/agents/");
+        for (JSONObject each : findExecutors(state.getJSONArray("frameworks"), appName)) {
+            JSONArray slaves = state.getJSONArray("slaves");
+            String slaveHost = null;
+            for (int i = 0; i < slaves.length(); i++) {
+                JSONObject slave = slaves.getJSONObject(i);
+                if (each.getString("slave_id").equals(slave.getString("id"))) {
+                    taskSandbox.append(slave.getString("id")).append("/browse?path=");
+                    slaveHost = slave.getString("pid").split("@")[1];
+                }
+            }
+            Preconditions.checkNotNull(slaveHost);
+            JSONObject slaveState = fetch(String.format("http://%s/state", slaveHost));
+            Collection<JSONObject> executorsOnSlave = findExecutors(slaveState.getJSONArray("frameworks"), appName);
+            for (JSONObject executorOnSlave : executorsOnSlave) {
+                if (executorId.equals(executorOnSlave.get("id"))) {
+                    String directory = executorOnSlave.getString("directory");
+                    if (null != directory) {
+                        taskSandbox.append(directory);
+                        return taskSandbox.toString();
+                    }
+                }
+            }
+        }
+        return new String();
+    }
+
+    /**
+     * 获取主机信息.
+     *
+     * @param slaveId slave主键
+     * @return hostName 主机
+     * @throws JSONException 解析JSON格式异常
+     */
+    public String getFailoverTaskHostname(final String slaveId) throws JSONException {
+        JSONObject state = fetch(stateUrl);
+        JSONArray slaves = state.getJSONArray("slaves");
+        String slaveHost = null;
+        for (int i = 0; i < slaves.length(); i++) {
+            JSONObject slave = slaves.getJSONObject(i);
+            if (slaveId.equals(slave.getString("id"))) {
+                slaveHost = slave.getString("hostname");
+            }
+        }
+        return slaveHost;
+    }
+
+    /**
      * 查找执行器信息.
      * 
      * @param appName 作业云配置App的名字
