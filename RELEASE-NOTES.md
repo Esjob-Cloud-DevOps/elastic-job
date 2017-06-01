@@ -1,3 +1,9 @@
+## 2.1.4
+
+### 缺陷修正
+
+1. [ISSUE #322](https://github.com/dangdangdotcom/elastic-job/issues/322) elastic-job-cloud-scheduler调度任务评估资源时考虑对executor的资源使用情况
+
 ## 2.1.3
 
 ### 功能提升
