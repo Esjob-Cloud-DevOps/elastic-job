@@ -98,7 +98,7 @@ public final class CloudJobRestfulApi {
     private final FacadeService facadeService;
     
     private final StatisticManager statisticManager;
-
+    
     public CloudJobRestfulApi() {
         Preconditions.checkNotNull(regCenter);
         configService = new CloudJobConfigurationService(regCenter);

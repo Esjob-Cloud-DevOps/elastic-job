@@ -55,7 +55,7 @@ import java.util.Set;
  */
 @Slf4j
 public final class FacadeService {
-
+    
     private static final String RUNNING_STATUS = "RUNNING";
 
     private static final String RUNNING_STATUS_COMMENT = "FRAMEWORK:RUNNING;ZK:MISSING";
@@ -75,7 +75,7 @@ public final class FacadeService {
     private final DisableAppService disableAppService;
     
     private final DisableJobService disableJobService;
-
+    
     private final MesosStateService mesosStateService;
 
     public FacadeService(final CoordinatorRegistryCenter regCenter) {

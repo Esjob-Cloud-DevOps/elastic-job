@@ -29,9 +29,15 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 待运行作业队列服务.
@@ -189,7 +195,7 @@ public final class ReadyService {
      */
     public Collection<Map<String, String>> getReadyJobTimes(final String jobName) {
         String times = regCenter.get(ReadyNode.getReadyJobNodePath(jobName));
-        Collection<Map<String, String>> result = new LinkedList<>();
+        Collection<Map<String, String>> result = Lists.newArrayList();
         Map<String, String> readyMap = new HashMap<>();
         if (!Strings.isNullOrEmpty(times)) {
             readyMap.put("jobName", jobName);
