@@ -17,10 +17,12 @@
 
 package com.dangdang.ddframe.job.cloud.scheduler.restful;
 
-import com.dangdang.ddframe.job.cloud.scheduler.config.job.*;
+import com.dangdang.ddframe.job.cloud.scheduler.config.job.CloudJobConfiguration;
+import com.dangdang.ddframe.job.cloud.scheduler.config.job.CloudJobConfigurationGsonFactory;
+import com.dangdang.ddframe.job.cloud.scheduler.config.job.CloudJobConfigurationService;
+import com.dangdang.ddframe.job.cloud.scheduler.config.job.CloudJobExecutionType;
 import com.dangdang.ddframe.job.cloud.scheduler.env.BootstrapEnvironment;
 import com.dangdang.ddframe.job.cloud.scheduler.mesos.FacadeService;
-import com.dangdang.ddframe.job.cloud.scheduler.mesos.MesosStateService;
 import com.dangdang.ddframe.job.cloud.scheduler.producer.ProducerManager;
 import com.dangdang.ddframe.job.cloud.scheduler.state.failover.FailoverTaskInfo;
 import com.dangdang.ddframe.job.cloud.scheduler.statistics.StatisticManager;
@@ -44,7 +46,6 @@ import com.dangdang.ddframe.job.util.json.GsonFactory;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.codehaus.jettison.json.JSONException;
 
@@ -98,21 +99,12 @@ public final class CloudJobRestfulApi {
     
     private final StatisticManager statisticManager;
 
-    private final MesosStateService mesosStateService;
-
-    private static final String RUNNING_STATUS = "RUNNING";
-
-    private static final String RUNNING_STATUS_COMMENT = "FRAMEWORK:RUNNING;ZK:MISSING";
-
-    private static final String FAILOVER_STATUS = "FAILOVER";
-    
     public CloudJobRestfulApi() {
         Preconditions.checkNotNull(regCenter);
         configService = new CloudJobConfigurationService(regCenter);
         facadeService = new FacadeService(regCenter);
         Optional<JobEventRdbConfiguration> jobEventRdbConfiguration = Optional.absent();
         statisticManager = StatisticManager.getInstance(regCenter, jobEventRdbConfiguration);
-        mesosStateService = new MesosStateService(regCenter);
     }
     
     /**
@@ -488,54 +480,5 @@ public final class CloudJobRestfulApi {
     @Consumes(MediaType.APPLICATION_JSON)
     public List<JobRegisterStatistics> findJobRegisterStatistics() {
         return statisticManager.findJobRegisterStatisticsSinceOnline();
-    }
-
-    /**
-     * 获取360视图作业数据.
-     *
-     * @return 360视图作业数据集合
-     */
-    @GET
-    @Path("/jobFullView/{jobName}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Collection<Map<String, String>> getReadyJobTimes(@PathParam("jobName") final String jobName) throws JSONException {
-        return facadeService.getReadyJobTimes(jobName);
-    }
-
-    /**
-     * 获取360视图任务数据.
-     *
-     * @return 360视图任务数据集合
-     */
-    @GET
-    @Path("/taskFullView/{jobName}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Collection<TaskFullViewInfo> getTaskFullViewInfo(@PathParam("jobName") final String jobName) throws JSONException {
-        Optional<CloudJobConfiguration> cloudJobConfigurationOptional = facadeService.load(jobName);
-        CloudJobConfiguration cloudJobConfiguration = null;
-        if (cloudJobConfigurationOptional.isPresent()) {
-            cloudJobConfiguration = cloudJobConfigurationOptional.get();
-        }
-        Collection<TaskContext> runningTasks = facadeService.getJobRunningTasks(jobName);
-        Collection<FailoverTaskInfo> failoverTasks = facadeService.getJobFailoverTasks(jobName);
-        Collection<TaskFullViewInfo> result = Lists.newArrayList();
-        if (runningTasks.size() > 0) {
-            for(TaskContext each : runningTasks) {
-                String statusInfo = RUNNING_STATUS;
-                if (cloudJobConfiguration.getJobExecutionType().equals(CloudJobExecutionType.DAEMON)) {
-                    if (!facadeService.getRunningTaskInZookeeper(each.getId())) {
-                        statusInfo = RUNNING_STATUS_COMMENT;
-                    }
-                }
-                result.add(new TaskFullViewInfo(each.getId(), facadeService.getHostNameByTaskId(each.getId()), statusInfo, mesosStateService.getTaskSandbox(cloudJobConfiguration.getAppName(), each.getExecutorId(cloudJobConfiguration.getAppName()))));
-            }
-        }
-        if (failoverTasks.size() > 0) {
-            for (FailoverTaskInfo each : failoverTasks) {
-                TaskContext taskContext = TaskContext.from(each.getOriginalTaskId());
-                result.add(new TaskFullViewInfo(taskContext.getId(), mesosStateService.getFailoverTaskHostname(taskContext.getSlaveId()), FAILOVER_STATUS, mesosStateService.getTaskSandbox(cloudJobConfiguration.getAppName(), taskContext.getExecutorId(cloudJobConfiguration.getAppName()))));
-            }
-        }
-        return result;
     }
 }

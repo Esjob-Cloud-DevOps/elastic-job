@@ -15,7 +15,7 @@
  * </p>
  */
 
-package com.dangdang.ddframe.job.cloud.scheduler.config.job;
+package com.dangdang.ddframe.job.cloud.scheduler.context;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

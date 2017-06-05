@@ -8,7 +8,7 @@ $(function() {
 function renderJobsFullView() {
     var jobName = $("#index-job-name").text();
     $("#jobs-full-view-tbl").bootstrapTable({
-         url: "/api/job/jobFullView/" + jobName,
+         url: "/api/operate/jobFullView/" + jobName,
          columns:
          [{
              field: "jobName",
@@ -23,7 +23,7 @@ function renderJobsFullView() {
 function renderTasksFullView() {
     var jobName = $("#index-job-name").text();
     $("#tasks-full-view-tbl").bootstrapTable({
-         url: "/api/job/taskFullView/" + jobName,
+         url: "/api/operate/taskFullView/" + jobName,
          columns:
          [{
              field: "taskId",
